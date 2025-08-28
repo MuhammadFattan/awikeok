@@ -197,8 +197,8 @@ async function Hi(e) {
 //   t.use(na),
 //   t.mount('#app')
 // });
-const dec = e => La(Ma(2), e)
-export {
-  dec,
-  Hi as init
-};
+const dec = e => La(Ma(2), e);   // "o" = decrypt
+const enc = e => La(Ma(79), e);  // "f" = encrypt (func 79)
+
+export { dec, enc, Hi as init };
+
