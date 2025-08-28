@@ -9,7 +9,7 @@ export default function Home() {
     const code = document.getElementById("friendcode").value;
     setLoading(true);
     try {
-      const res = await fetch("https://api.arona.icu/api/friends/find", {
+      const res = await fetch("/api/proxy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ friendCode: code }),
