@@ -1,4 +1,4 @@
-import { init, enc, dec } from "../../public/runnable.js";
+import { init, enc, dec } from "../../src/runnable.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
