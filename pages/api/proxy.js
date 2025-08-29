@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-export async function POST(req) {
   try {
-    const { crypt } = await req.json();
+    const { crypt } = req.body;
     if (!crypt) {
-      return NextResponse.json({ error: "crypt is required" }, { status: 400 });
+      return res.status(400).json({ error: "crypt is required" });
     }
 
     // Forward langsung ke Arona
@@ -13,19 +15,18 @@ export async function POST(req) {
       headers: {
         "Content-Type": "application/json;charset=UTF-8",
         "User-Agent": "Mozilla/5.0",
-        "Origin": "https://arona.icu",
+        "Origin": "https://api.arona.icu",
       },
       body: JSON.stringify({ crypt }),
     });
 
     const encrypted = await response.text();
 
-    return NextResponse.json({ encrypted });
+    return res.status(200).json({ encrypted });
   } catch (err) {
     console.error("Proxy error:", err);
-    return NextResponse.json(
-      { error: "Proxy failed", detail: err.toString() },
-      { status: 500 }
+    return res.status(500).json(
+      { error: "Proxy failed", detail: err.toString() }
     );
   }
 }

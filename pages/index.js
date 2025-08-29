@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import { init, enc, dec } from "../src/runnable.js";
 
