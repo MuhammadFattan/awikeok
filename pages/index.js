@@ -1,25 +1,45 @@
+"use client";
 import { useState } from "react";
-import AssistList from "../component/AssistList";
+import { init, enc, dec } from "../src/runnable.js";
 
 export default function Home() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [output, setOutput] = useState("");
 
-  const fetchData = async () => {
+  const fetchAndDecrypt = async () => {
     const code = document.getElementById("friendcode").value;
-    setLoading(true);
+
     try {
+      // init wasm di client
+      await init();
+
+      // encrypt di client
+      const crypt = enc(code);
+
+      // kirim crypt ke proxy
       const res = await fetch("/api/proxy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ friendCode: code }),
+        body: JSON.stringify({ crypt }),
       });
-      const json = await res.json();
-      setData(json);
+
+      const data = await res.json();
+      if (!data.encrypted) {
+        setOutput("❌ Tidak ada data terenkripsi dari server.");
+        return;
+      }
+
+      // decrypt di client
+      const decrypted = dec(data.encrypted);
+
+      try {
+        const json = JSON.parse(decrypted);
+        setOutput(JSON.stringify(json, null, 2));
+      } catch {
+        setOutput(decrypted);
+      }
     } catch (err) {
-      console.error(err);
+      setOutput(`❌ Error: ${err}`);
     }
-    setLoading(false);
   };
 
   return (
@@ -31,14 +51,21 @@ export default function Home() {
         style={{ padding: "0.5rem", fontSize: "1rem" }}
       />
       <button
-        onClick={fetchData}
+        onClick={fetchAndDecrypt}
         style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}
       >
         Cari
       </button>
-
-      {loading && <p>Sedang memuat...</p>}
-      {data && <AssistList data={data} />}
+      <pre
+        style={{
+          marginTop: "2rem",
+          background: "#f0f0f0",
+          padding: "1rem",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {output}
+      </pre>
     </main>
   );
 }

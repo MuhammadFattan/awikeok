@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
-import { init, enc, dec } from "../../../src/runnable.js";
 
 export async function POST(req) {
   try {
-    const { friendCode } = await req.json();
-    if (!friendCode) {
-      return NextResponse.json({ error: "friendCode is required" }, { status: 400 });
+    const { crypt } = await req.json();
+    if (!crypt) {
+      return NextResponse.json({ error: "crypt is required" }, { status: 400 });
     }
 
-    await init();
-    const crypt = enc(friendCode);
-
+    // Forward langsung ke Arona
     const response = await fetch("https://api.arona.icu/api/friends/find", {
       method: "POST",
       headers: {
@@ -22,11 +19,13 @@ export async function POST(req) {
     });
 
     const encrypted = await response.text();
-    const decrypted = dec(encrypted);
 
-    return NextResponse.json(JSON.parse(decrypted));
+    return NextResponse.json({ encrypted });
   } catch (err) {
     console.error("Proxy error:", err);
-    return NextResponse.json({ error: "Proxy failed", detail: err.toString() }, { status: 500 });
+    return NextResponse.json(
+      { error: "Proxy failed", detail: err.toString() },
+      { status: 500 }
+    );
   }
 }
